@@ -99,50 +99,51 @@ M8,21 L12,21 L17,26 L17,10 L12,15 L8,15 L8,21 Z M19,14 L19,22 C20.48,21.32 21.5,
         console.log(`now vol: ${pctNum} %`)
     }
 
-    function keyPress(e){
+     function keyPress(e){
+        // for迴圈用意: getElementByTagName('video')會有多個結果
+        let video = document.getElementsByTagName("video");
         for(let i=0; i<video.length; i++){
             let videoTarget = video[i]
             // vol++
             if(e.code === 'KeyW'){
-                if( (videoTarget.volume+0.1) >= 1 ){
-                    videoTarget.volume = 1
+                if(videoTarget.volume+0.05 > 100){
+                    videoTarget.volume = 100
                 }else{
-                    videoTarget.volume+= 0.1
+                    videoTarget.volume += 0.05
                 }
-                let targetVol = parseFloat(videoTarget.volume.toFixed(1))
-
-                // 各tag需要用到的data
-                setTargetVolData(targetVol)
-                // 畫面中間音量提示
-                volAlert(setTargetVolData(targetVol))
-                console.log(`the vol is: ${setTargetVolData(targetVol)}`)
+                resultVol(videoTarget.volume,i)
             }
+
             // vol--
             if(e.code === 'KeyQ'){
-                if( (videoTarget.volume-0.1) <= 0 ){
+                if(videoTarget.volume-0.05 <= 0){
                     videoTarget.volume = 0
                 }else{
-                    videoTarget.volume-= 0.1
+                    videoTarget.volume -= 0.05
                 }
-                let targetVol = parseFloat(videoTarget.volume.toFixed(1))
-
-                // 各tag需要用到的data
-                setTargetVolData(targetVol)
-                // 畫面中間音量提示
-                volAlert(setTargetVolData(targetVol))
-                console.log(`the vol is: ${setTargetVolData(targetVol)}`)
+                resultVol(videoTarget.volume,i)
             }
 
-            // b
-            if(e.code==='KeyB'){
+            // b: show detail & test div
+			if(e.code === 'KeyB'){
                 console.log('keyB',e)
-                console.log('vid',video)
-                console.log('vid.item no ', video.item(0))
-                console.log('vid.item',videoTarget)
+				console.log('vid',video)
+				console.log('vid.item no ', video.item(0))
+                // 新增測試用 div
+                let newTestDiv = document.createElement('div')
+                newTestDiv.id = 'testdiv'
+                newTestDiv.setAttribute('style',volAlertDivStyle)
+                newTestDiv.textContent = 'test'
+                document.body.appendChild(newTestDiv)
             }
-        }
 
-    }
+            // n: remove test div
+            if(e.code === 'KeyN'){
+                document.getElementById('testdiv').remove()
+            }
+		}
 
-    window.addEventListener('keydown',keyPress)
+	}
+
+	window.addEventListener('keydown',keyPress)
 })();
