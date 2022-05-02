@@ -77,6 +77,27 @@ M8,21 L12,21 L17,26 L17,10 L12,15 L8,15 L8,21 Z M19,14 L19,22 C20.48,21.32 21.5,
             document.getElementById('volShowDiv').remove()
         },1000)
     }
+	
+    // videoVolOrig = videoTarget.volume
+    function resultVol(videoVolOrig, i){
+        // 單位數值轉換(percent = pct)
+        function pctNumOrig(videoVolOrig){
+            // 音量小數點修正(revise)，預設數值是 0.2xxxxxxxx
+            let reviseVol = parseFloat(videoVolOrig.toFixed(2))
+            console.log('orig',videoVolOrig,'revise',reviseVol)
+            // 轉成 百分數值
+            const percentNum = reviseVol * 100
+            // 確保回傳是整數
+            return parseFloat(percentNum.toFixed(0))
+        }
+        const pctNum = pctNumOrig(videoVolOrig)
+
+        // 各tag需要用到的data
+        setVolData(pctNum,i)
+        // 畫面中間音量提示
+        volAlert(pctNum)
+        console.log(`now vol: ${pctNum} %`)
+    }
 
     function keyPress(e){
         for(let i=0; i<video.length; i++){
