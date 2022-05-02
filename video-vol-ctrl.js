@@ -38,23 +38,24 @@ M8,21 L12,21 L17,26 L17,10 L12,15 L8,15 L8,21 Z M19,14 L19,22 C20.48,21.32 21.5,
 M8,21 L12,21 L17,26 L17,10 L12,15 L8,15 L8,21 Z M19,14 L19,22 C20.48,21.32 21.5,19.77 21.5,18 C21.5,16.26 20.48,14.74 19,14 ZM19,11.29 C21.89,12.15 24,14.83 24,18 C24,21.17 21.89,23.85 19,24.71 L19,26.77 C23.01,25.86 26,22.28 26,18 C26,13.72 23.01,10.14 19,9.23 L19,11.29 Z
 `
 
-
-
-    // set 各項 html tag 需要用到的data
-    function setTargetVolData(targetVol){
+    // 寫回各項 html tag (aria-value) 需要用到的數值
+    function setVolData(pctNum, i){
         // Video bottom panel
-        let ytpPanel = document.querySelector('.ytp-volume-panel')
-        let ytpSlider = document.querySelector('.ytp-volume-slider-handle')
-        // 轉成 %數值，並傳到 html tag 的 data
-        let percentNum = targetVol * 100
-        ytpPanel.ariaValuenow = percentNum
-        ytpPanel.ariaValuetext = `${percentNum}% 音量`;
-        // 控制音量拉桿 ( max:40px )
-        let ytpSliderLength = percentNum / 2.5
+        let ytpVolPanel = document.getElementsByClassName('ytp-volume-panel')[i]
+        let ytpSlider = document.getElementsByClassName('ytp-volume-slider-handle')[i]
+        // 傳到 html tag 的 data
+        ytpVolPanel.ariaValuenow = pctNum
+        ytpVolPanel.ariaValueText = `${pctNum}% 音量`;
+        // 控制音量拉桿CSS ( max:40px )
+        let ytpSliderLength = pctNum / 2.5
         ytpSlider.style.left = `${ytpSliderLength}px`
 
-        return `${percentNum}%`
+        // 切換喇吧圖示大小
+        let speakerImg = document.getElementsByClassName('ytp-svg-volume-animation-speaker')[0]
+        if(pctNum <= 50) speakerImg.attributes.d.nodeValue = speakerImgSmall
+        if(pctNum > 50) speakerImg.attributes.d.nodeValue = speakerImgBig
     }
+	
     // 畫面中間音量提示
     function volAlert(percentNum){
       
