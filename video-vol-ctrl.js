@@ -12,9 +12,9 @@
 // ==/UserScript==
 
 (function() {
-    
-	  // 音量提示 div style
-	let volAlertDivStyle=`
+
+    // 音量提示 div style
+    let volAlertDivStyle=`
 position: absolute;
 left: 50%;
 top: 80px;
@@ -56,19 +56,26 @@ M8,21 L12,21 L17,26 L17,10 L12,15 L8,15 L8,21 Z M19,14 L19,22 C20.48,21.32 21.5,
         if(pctNum > 50) speakerImg.attributes.d.nodeValue = speakerImgBig
     }
 	
-    // 畫面中間音量提示
-    function volAlert(percentNum){
-      
+    // 音量提示 (畫面中間)
+    let timeoutRemoveDiv = null
+    function volAlert(pctNum){
         let newDiv = document.createElement('div')
-        newDiv.id = "volNowDiv"
-        newDiv.textContent = percentNum
-        newDiv.setAttribute('style',volAlertDivCss.pop())
-        let speedCtrl = document.querySelector('.html5-video-container')
-        speedCtrl.appendChild(newDiv)
+        newDiv.id = "volShowDiv"
+        newDiv.textContent = `${pctNum} %`
+        newDiv.setAttribute('style',volAlertDivStyle)
 
-        setTimeout(()=>{
-            speedCtrl.querySelector('#volNowDiv').remove()
-        },500)
+        // 避免多次按下，上一次的DIV未自然消失，造成CSS重複顯示
+        if(document.getElementById('volShowDiv')){
+            document.getElementById('volShowDiv').remove()
+            clearTimeout(timeoutRemoveDiv)
+            timeoutRemoveDiv = null
+        }
+        // 上面先取消一次後，新增id="volShowDiv"的div
+        document.body.appendChild(newDiv)
+        // 自然消失
+        timeoutRemoveDiv = setTimeout(()=>{
+            document.getElementById('volShowDiv').remove()
+        },1000)
     }
 
     function keyPress(e){
