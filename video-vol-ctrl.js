@@ -12,8 +12,22 @@
 // ==/UserScript==
 
 (function() {
-    //let volNow = document.getElementsByTagName('aria-valuenow');
-
+    
+	let volAlertDivStyle=`
+position: absolute;
+left: 50%;
+top: 80px;
+margin-left: -32px;
+z-index: 99;
+background: #234d6c;
+opacity: .5;
+min-width: 50px;
+padding: 5px;
+border-radius: 8px;
+color: snow;
+text-align:center;
+font-size: 20px;
+`
     let video = document.getElementsByTagName("video");
 
     // set 各項 html tag 需要用到的data
@@ -33,20 +47,7 @@
     }
     // 畫面中間音量提示
     function volAlert(percentNum){
-        let volAlertDivCss=[`
-position: absolute;
-left: 50%;
-top: 80px;
-margin-left: -32px;
-z-index: 99;
-background: black;
-opacity: .5;
-width: 50px;
-padding: 5px;
-border-radius: 8px;
-text-align:center;
-font-size: 20px;
-`]
+      
         let newDiv = document.createElement('div')
         newDiv.id = "volNowDiv"
         newDiv.textContent = percentNum
