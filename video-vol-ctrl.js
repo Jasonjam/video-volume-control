@@ -106,8 +106,8 @@ M8,21 L12,21 L17,26 L17,10 L12,15 L8,15 L8,21 Z M19,14 L19,22 C20.48,21.32 21.5,
             let videoTarget = video[i]
             // vol++
             if(e.code === 'KeyW'){
-                if(videoTarget.volume+0.05 > 100){
-                    videoTarget.volume = 100
+                if(videoTarget.volume+0.05 > 1){
+                    videoTarget.volume = 1
                 }else{
                     videoTarget.volume += 0.05
                 }
