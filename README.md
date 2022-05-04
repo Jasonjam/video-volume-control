@@ -1,5 +1,5 @@
 # video-vol-ctrl 控制音量
-搭配 tampermonkey，暫時僅供youtube使用
+搭配 tampermonkey，暫時只有yt用
 
 Q鍵: 音量 -5%  
 W鍵: 音量 +5%
