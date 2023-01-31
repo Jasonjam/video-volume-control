@@ -4,10 +4,10 @@
 // @version      1.0
 // @description  try to take over the world!
 // @author       Jasonjam
-// @match        https://www.youtube.com*
-// @include      https://www.youtube.com/*
+// @match        https://www.youtube.com/*
+// @match        https://wetv.vip/zh-tw/*
 // @require      https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.11/vue.min.js
-// @run-at       document-start
+// @run-at       document-end
 // @grant        none
 // ==/UserScript==
 
@@ -15,7 +15,7 @@
 
     // 音量提示 div style
     let volAlertDivStyle=`
-position: absolute;
+position: fixed;
 left: 50%;
 top: 80px;
 margin-left: -32px;
@@ -30,7 +30,7 @@ text-align:center;
 font-size: 20px;
 `
     // 喇吧圖示
-    //修改在 .ytp-svg-volume-animation-speaker[o].attributes.d.nodeValue
+    // 修改在 .ytp-svg-volume-animation-speaker[o].attributes.d.nodeValue
     let speakerImgSmall = `
 M8,21 L12,21 L17,26 L17,10 L12,15 L8,15 L8,21 Z M19,14 L19,22 C20.48,21.32 21.5,19.77 21.5,18 C21.5,16.26 20.48,14.74 19,14 Z
 `
@@ -39,7 +39,7 @@ M8,21 L12,21 L17,26 L17,10 L12,15 L8,15 L8,21 Z M19,14 L19,22 C20.48,21.32 21.5,
 `
 
     // 寫回各項 html tag (aria-value) 需要用到的數值
-    function setVolData(pctNum, i){
+    function setVolDataBackToTag(pctNum, i){
         // Video bottom panel
         let ytpVolPanel = document.getElementsByClassName('ytp-volume-panel')[i]
         let ytpSlider = document.getElementsByClassName('ytp-volume-slider-handle')[i]
@@ -55,51 +55,65 @@ M8,21 L12,21 L17,26 L17,10 L12,15 L8,15 L8,21 Z M19,14 L19,22 C20.48,21.32 21.5,
         if(pctNum <= 50) speakerImg.attributes.d.nodeValue = speakerImgSmall
         if(pctNum > 50) speakerImg.attributes.d.nodeValue = speakerImgBig
     }
-	
-    // 音量提示 (畫面中間)
-    let timeoutRemoveDiv = null
-    function volAlert(pctNum){
-        let newDiv = document.createElement('div')
-        newDiv.id = "volShowDiv"
-        newDiv.textContent = `${pctNum} %`
-        newDiv.setAttribute('style',volAlertDivStyle)
 
-        // 避免多次按下，上一次的DIV未自然消失，造成CSS重複顯示
-        if(document.getElementById('volShowDiv')){
-            document.getElementById('volShowDiv').remove()
-            clearTimeout(timeoutRemoveDiv)
-            timeoutRemoveDiv = null
+    // 音量提示 (畫面中間)
+    function showVolAlertDiv(pctNum,i){
+        // alertDiv 相關
+        let newAlertDiv = document.createElement('div')
+        newAlertDiv.className = "volAlertDiv"
+        newAlertDiv.textContent = `${pctNum} %`
+        newAlertDiv.setAttribute('style',volAlertDivStyle)
+
+        // 避免多次按下，上一次的 alertDiv 未自然消失，造成CSS重複顯示
+        // 先偵測一次，如果不存在，就新增一個
+        // 如果存在，把display: noen關掉(覆蓋CSS)
+        let findTagVolAlertDiv = document.getElementsByClassName("volAlertDiv")
+        if(findTagVolAlertDiv.length === 0){
+            // 不存在，新增 alertDiv 到 video-tag 前
+            let videoNodeParent = document.getElementsByTagName("video")[i].parentNode
+            let videoNode = document.getElementsByTagName("video")[i]
+            videoNodeParent.insertBefore(newAlertDiv, videoNode)
+        }else{
+            // 存在，上次1.5秒後會display:none，所以再覆蓋一次CSS
+            findTagVolAlertDiv[i].textContent = `${pctNum} %`
+            findTagVolAlertDiv[i].setAttribute('style',volAlertDivStyle)
         }
-        // 上面先取消一次後，新增id="volShowDiv"的div
-        document.body.appendChild(newDiv)
-        // 自然消失
-        timeoutRemoveDiv = setTimeout(()=>{
-            document.getElementById('volShowDiv').remove()
-        },1000)
     }
-	
+
+    // 自然消失，用CSS display:none
+    let timeoutRemoveDiv = null
+    function disVolAlertDiv(i){
+        timeoutRemoveDiv = setTimeout(()=>{
+            document.getElementsByClassName('volAlertDiv')[i].setAttribute('style',volAlertDivStyle+'display: none;')
+        },1500)
+    }
+
+    // 最終結果
     // videoVolOrig = videoTarget.volume
     function resultVol(videoVolOrig, i){
         // 單位數值轉換(percent = pct)
         function pctNumOrig(videoVolOrig){
             // 音量小數點修正(revise)，預設數值是 0.2xxxxxxxx
             let reviseVol = parseFloat(videoVolOrig.toFixed(2))
-            console.log('orig',videoVolOrig,'revise',reviseVol)
+            // 檢查 原始數值 & 修正後數值
+            //console.log('orig',videoVolOrig,'revise',reviseVol)
             // 轉成 百分數值
             const percentNum = reviseVol * 100
             // 確保回傳是整數
             return parseFloat(percentNum.toFixed(0))
         }
+        // 最終的 百分比數字
         const pctNum = pctNumOrig(videoVolOrig)
 
         // 各tag需要用到的data
-        setVolData(pctNum,i)
+        setVolDataBackToTag(pctNum,i)
         // 畫面中間音量提示
-        volAlert(pctNum)
-        console.log(`now vol: ${pctNum} %`)
+        showVolAlertDiv(pctNum,i)
+        disVolAlertDiv(i)
+        //console.log(`now vol: ${pctNum} %`)
     }
 
-     function keyPress(e){
+    function keyPress(e){
         // for迴圈用意: getElementByTagName('video')會有多個結果
         let video = document.getElementsByTagName("video");
         for(let i=0; i<video.length; i++){
@@ -125,25 +139,42 @@ M8,21 L12,21 L17,26 L17,10 L12,15 L8,15 L8,21 Z M19,14 L19,22 C20.48,21.32 21.5,
             }
 
             // b: show detail & test div
-			if(e.code === 'KeyB'){
+            if(e.code === 'KeyB'){
                 console.log('keyB',e)
-				console.log('vid',video)
-				console.log('vid.item no ', video.item(0))
-                // 新增測試用 div
+                console.log('vid',video)
+                console.log('vid.item No. ', video.item(i))
+                // 新增設定 測試用 div
+
                 let newTestDiv = document.createElement('div')
-                newTestDiv.id = 'testdiv'
+                newTestDiv.className = 'volAlertDiv'
                 newTestDiv.setAttribute('style',volAlertDivStyle)
                 newTestDiv.textContent = 'test'
-                document.body.appendChild(newTestDiv)
+
+                // 將測試用 test div 新增到 video-tag 前
+                let findTagVolAlertDiv = document.getElementsByClassName("volAlertDiv")
+                // 如果已經存在 test div 就不動作
+                if(findTagVolAlertDiv.length === 0){
+                    let videoNodeParent = document.getElementsByTagName("video")[i].parentNode
+                    let videoNode = document.getElementsByTagName("video")[i]
+                    videoNodeParent.insertBefore(newTestDiv, videoNode)
+                    console.log("unfound and append one",findTagVolAlertDiv)
+                }else{
+                    console.log("alreay have")
+                }
+
+
             }
 
             // n: remove test div
             if(e.code === 'KeyN'){
-                document.getElementById('testdiv').remove()
+                let origCss = document.getElementsByClassName('volAlertDiv')[i].getAttribute('style')
+                console.log(origCss)
+                document.getElementsByClassName('volAlertDiv')[i].setAttribute('style',volAlertDivStyle+'display: none;')
+               // document.getElementsByClassName('volAlertDiv')[i].setAttribute("style","display: none;")
             }
-		}
+        }
 
-	}
+    }
 
-	window.addEventListener('keydown',keyPress)
+    window.addEventListener('keydown',keyPress)
 })();
