@@ -7,7 +7,7 @@
 // @match        https://www.youtube.com/*
 // @match        https://wetv.vip/zh-tw/*
 // @require      https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.11/vue.min.js
-// @run-at       document-end
+// @run-at       document-start
 // @grant        none
 // ==/UserScript==
 
@@ -67,16 +67,16 @@ M8,21 L12,21 L17,26 L17,10 L12,15 L8,15 L8,21 Z M19,14 L19,22 C20.48,21.32 21.5,
         // 避免多次按下，上一次的 alertDiv 未自然消失，造成CSS重複顯示
         // 先偵測一次，如果不存在，就新增一個
         // 如果存在，把display: noen關掉(覆蓋CSS)
-        let findTagVolAlertDiv = document.getElementsByClassName("volAlertDiv")
-        if(findTagVolAlertDiv.length === 0){
+        let findTagVolAlertDiv = document.getElementsByClassName("volAlertDiv")[i]
+        if(!findTagVolAlertDiv){
             // 不存在，新增 alertDiv 到 video-tag 前
             let videoNodeParent = document.getElementsByTagName("video")[i].parentNode
             let videoNode = document.getElementsByTagName("video")[i]
             videoNodeParent.insertBefore(newAlertDiv, videoNode)
         }else{
             // 存在，上次1.5秒後會display:none，所以再覆蓋一次CSS
-            findTagVolAlertDiv[i].textContent = `${pctNum} %`
-            findTagVolAlertDiv[i].setAttribute('style',volAlertDivStyle)
+            findTagVolAlertDiv.textContent = `${pctNum} %`
+            findTagVolAlertDiv.setAttribute('style',volAlertDivStyle)
         }
     }
 
@@ -139,37 +139,32 @@ M8,21 L12,21 L17,26 L17,10 L12,15 L8,15 L8,21 Z M19,14 L19,22 C20.48,21.32 21.5,
             }
 
             // b: show detail & test div
-            if(e.code === 'KeyB'){
-                console.log('keyB',e)
-                console.log('vid',video)
-                console.log('vid.item No. ', video.item(i))
-                // 新增設定 測試用 div
+            let newTestDiv = document.createElement("div");
+            newTestDiv.className = "volAlertDivTest";
+            newTestDiv.setAttribute("style", volAlertDivStyle);
+            newTestDiv.textContent = "test";
+            if (e.code === "KeyB") {
+                //console.log("keyB", e);
+                //console.log("vid[i]", video[i]);
+                //console.log("vid.item No. ", video.item(i));
 
-                let newTestDiv = document.createElement('div')
-                newTestDiv.className = 'volAlertDiv'
-                newTestDiv.setAttribute('style',volAlertDivStyle)
-                newTestDiv.textContent = 'test'
-
-                // 將測試用 test div 新增到 video-tag 前
-                let findTagVolAlertDiv = document.getElementsByClassName("volAlertDiv")
+                let findTagVolAlertDiv = document.getElementsByClassName("volAlertDivTest")[i];
                 // 如果已經存在 test div 就不動作
-                if(findTagVolAlertDiv.length === 0){
-                    let videoNodeParent = document.getElementsByTagName("video")[i].parentNode
-                    let videoNode = document.getElementsByTagName("video")[i]
-                    videoNodeParent.insertBefore(newTestDiv, videoNode)
-                    console.log("unfound and append one",findTagVolAlertDiv)
-                }else{
-                    console.log("alreay have")
+                if (!findTagVolAlertDiv) {
+                    let videoNodeParent = videoTarget.parentNode;
+                    videoNodeParent.insertBefore(newTestDiv, videoTarget);
+                    console.log("unfound and append one", findTagVolAlertDiv, "i是幾", i);
+                } else {
+                    findTagVolAlertDiv.setAttribute("style", volAlertDivStyle);
+                    console.log("alreay have");
                 }
-
-
             }
 
             // n: remove test div
             if(e.code === 'KeyN'){
-                let origCss = document.getElementsByClassName('volAlertDiv')[i].getAttribute('style')
+                let origCss = document.getElementsByClassName('volAlertDivTest')[i].getAttribute('style')
                 console.log(origCss)
-                document.getElementsByClassName('volAlertDiv')[i].setAttribute('style',volAlertDivStyle+'display: none;')
+                document.getElementsByClassName('volAlertDivTest')[i].setAttribute('style',volAlertDivStyle+'display: none;')
                // document.getElementsByClassName('volAlertDiv')[i].setAttribute("style","display: none;")
             }
         }
