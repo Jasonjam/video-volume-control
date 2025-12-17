@@ -7,7 +7,6 @@
 // @match        https://www.youtube.com/*
 // @match        https://www.bilibili.com/*
 // @match        https://myself-bbs.com/*
-// @match        https://v.myself-bbs.com/*
 // @match        https://www.facebook.com/*
 // @run-at       document-end
 // @grant        none
@@ -117,3 +116,4 @@
         }
     }, true); // 用 capture 比較能搶在 YT/元件前面處理
 })();
+
